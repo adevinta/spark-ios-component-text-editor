@@ -1,12 +1,16 @@
 //
 //  TextEditorIntent.swift
-//  SparkTextEditor
+//  SparkEditor
 //
-//  Created by robin.lemaire on 19/07/2024.
+//  Created by alican.aycil on 25.05.24.
 //  Copyright © 2024 Adevinta. All rights reserved.
 //
 
-/// The intent of the texteditor.
+import Foundation
+
 public enum TextEditorIntent: CaseIterable {
-    case primary
+    case neutral
+    case success
+    case error
+    case alert
 }

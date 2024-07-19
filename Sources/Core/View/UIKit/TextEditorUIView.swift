@@ -1,156 +1,320 @@
 //
 //  TextEditorUIView.swift
-//  SparkTextEditor
+//  SparkEditor
 //
-//  Created by robin.lemaire on 19/07/2024.
+//  Created by alican.aycil on 23.05.24.
 //  Copyright © 2024 Adevinta. All rights reserved.
 //
 
 import UIKit
+import Combine
 import SparkTheming
 @_spi(SI_SPI) import SparkCommon
 
-/// The UIKit version for the texteditor.
-public final class TextEditorUIView: UIView {
+/// Spark TextEditorUIView, subclasses UITextView
+public final class TextEditorUIView: UITextView {
 
-    // MARK: - Components
+    // Private Variables
+    @ScaledUIMetric private var defaultSystemVerticalPadding: CGFloat = 10
+    @ScaledUIMetric private var scaleFactor: CGFloat = 1.0
 
-    private lazy var contentStackView: UIStackView = {
-        let stackView = UIStackView(
-            arrangedSubviews:
-                [
-                    self.textLabel
-                ])
-        stackView.axis = .horizontal
-        return stackView
-    }()
+    private var viewModel: TextEditorViewModel!
+    private var cancellables = Set<AnyCancellable>()
+    private var placeHolderConstarints: [NSLayoutConstraint]?
+    private var placeHolderLabelYAnchor: NSLayoutConstraint?
+    private var placeHolderLabelXAnchor: NSLayoutConstraint?
+    private var placeholderLabelWidthAnchor: NSLayoutConstraint?
 
-    private var textLabel: UILabel = {
+    private lazy var placeHolderLabel: UILabel = {
         let label = UILabel()
-        label.text = "Hello TextEditor"
-        label.numberOfLines = 1
-        label.lineBreakMode = .byTruncatingTail
+        label.backgroundColor = .clear
+        label.numberOfLines = 0
         label.adjustsFontForContentSizeCategory = true
-        label.setContentCompressionResistancePriority(.required,
-                                                      for: .vertical)
-        label.setContentCompressionResistancePriority(.required,
-                                                      for: .horizontal)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.isAccessibilityElement = false
+        label.isHidden = true
         return label
     }()
 
-    // MARK: - Public Properties
+    private weak var _delegate: UITextViewDelegate?
 
-    /// The spark theme of the texteditor.
+    // Public Variables
+
+    /// The texteditor's custom delegate.
+    public override var delegate: UITextViewDelegate? {
+        set {
+            self._delegate = newValue
+        }
+        get {
+            return super.delegate
+        }
+    }
+
+    public override var text: String! {
+        didSet {
+            self.hidePlaceHolder(!self.text.isEmpty)
+        }
+    }
+
+    /// The texteditor's isScrollEnabled. To grow textview according to text, set this parameter as an false.
+    public override var isScrollEnabled: Bool {
+        didSet {
+            self.placeHolderLabelYAnchor?.isActive = !self.isScrollEnabled
+            self.placeHolderLabelXAnchor?.isActive = !self.isScrollEnabled
+            self.placeholderLabelWidthAnchor?.isActive = self.isScrollEnabled
+            self.setNeedsUpdateConstraints()
+        }
+    }
+
+    /// The texteditor's current theme.
     public var theme: Theme {
-        didSet {
-            // TODO: If needed
+        get {
+            return self.viewModel.theme
+        }
+        set {
+            self.viewModel.theme = newValue
         }
     }
 
-    /// The intent of the texteditor.
+    /// The texteditor's current intent.
     public var intent: TextEditorIntent {
-        didSet {
-            // TODO: If needed
+        get {
+            return self.viewModel.intent
+        }
+        set {
+            self.viewModel.intent = newValue
         }
     }
 
-    // MARK: - Private Properties
+    /// The texteditor's current placeholder.
+    public var placeHolder: String? {
+        get {
+            return self.placeHolderLabel.text
+        }
+        set {
+            self.placeHolderLabel.text = newValue
+            self.hidePlaceHolder(!self.text.isEmpty)
+        }
+    }
 
-    // TODO: If needed
+    /// The texteditor's userInteractionEnabled.
+    public var isEnabled: Bool {
+        get {
+            return self.viewModel.isEnabled
+        }
+        set {
+            self.viewModel.isEnabled = newValue
+            self.isUserInteractionEnabled = newValue
+            if !isEnabled {
+               _ = self.resignFirstResponder()
+            }
+        }
+    }
 
-    // MARK: - Initialization
+    /// The texteditor's read only mode.
+    public var isReadOnly: Bool {
+        get {
+            return self.viewModel.isReadOnly
+        }
+        set {
+            self.viewModel.isReadOnly = newValue
+            self.isEditable = !newValue
+        }
+    }
 
-    /// Initialize a new texteditor view.
+    /// TextEditorUIView initializer
     /// - Parameters:
-    ///   - theme: The spark theme of the texteditor.
-    ///   - intent: The intent of the texteditor.
-    public convenience init(
+    ///   - theme: The texteditors's current theme
+    ///   - intent: The texteditors's current intent
+    public init(
         theme: Theme,
         intent: TextEditorIntent
     ) {
-        self.init(
-            theme,
+        let viewModel = TextEditorViewModel(
+            theme: theme,
             intent: intent
         )
-    }
+        self.viewModel = viewModel
 
-    private init(
-        _ theme: Theme,
-        intent: TextEditorIntent
-    ) {
-        self.theme = theme
-        self.intent = intent
-
-        super.init(frame: .zero)
+        super.init(
+            frame: .zero,
+            textContainer: nil
+        )
+        super.delegate = self
 
         self.setupView()
     }
 
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-
-    // MARK: - View setup
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     private func setupView() {
-        // Properties
+        self.setupAccessibility()
+        self.setupTextViewAttributes()
+        self.subscribeToViewModel()
+        self.setupLayout()
+    }
+
+    private func setupAccessibility() {
         self.accessibilityIdentifier = TextEditorAccessibilityIdentifier.view
-
-        // Add subview
-        self.addSubview(self.contentStackView)
-
-        // Setup constraints
-        self.setupConstraints()
-
-        // Setup publisher subcriptions
-        self.setupSubscriptions()
     }
 
-    // MARK: - Layout
-
-    public override func layoutSubviews() {
-        super.layoutSubviews()
-
-        // TODO: If Needed
+    private func setupTextViewAttributes() {
+        self.adjustsFontForContentSizeCategory = true
+        self.showsHorizontalScrollIndicator = false
     }
 
-    // MARK: - Constraints
-
-    private func setupConstraints() {
-        self.setupViewConstraints()
-        self.setupContentStackViewConstraints()
-
-        // TODO: If Needed
-    }
-
-    private func setupViewConstraints() {
+    private func setupLayout() {
         self.translatesAutoresizingMaskIntoConstraints = false
 
-        // TODO: If Needed
+        self.textContainer.lineFragmentPadding = 0
+        self.textContainerInset = UIEdgeInsets(
+            top: self.defaultSystemVerticalPadding,
+            left: self.viewModel.horizontalSpacing * self.scaleFactor,
+            bottom: self.defaultSystemVerticalPadding,
+            right: self.viewModel.horizontalSpacing * self.scaleFactor
+        )
+
+        self.addSubview(self.placeHolderLabel)
+        self.placeHolderConstarints = [
+            self.placeHolderLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: self.defaultSystemVerticalPadding),
+            self.placeHolderLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: self.viewModel.horizontalSpacing * self.scaleFactor),
+            self.placeHolderLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -self.viewModel.horizontalSpacing * self.scaleFactor),
+            self.placeHolderLabel.bottomAnchor.constraint(greaterThanOrEqualTo: self.bottomAnchor, constant: -self.defaultSystemVerticalPadding)
+        ]
+        self.placeHolderLabelYAnchor = self.placeHolderLabel.centerYAnchor.constraint(lessThanOrEqualTo: self.centerYAnchor)
+        self.placeHolderLabelXAnchor = self.placeHolderLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor)
+        self.placeholderLabelWidthAnchor = self.placeHolderLabel.widthAnchor.constraint(lessThanOrEqualTo: self.textInputView.widthAnchor, constant: -2 * self.viewModel.horizontalSpacing * self.scaleFactor)
     }
 
-    private func setupContentStackViewConstraints() {
-        self.contentStackView.translatesAutoresizingMaskIntoConstraints = false
-
-        NSLayoutConstraint.activate([
-            self.contentStackView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-            self.contentStackView.topAnchor.constraint(equalTo: self.topAnchor),
-            self.contentStackView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-            self.contentStackView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
-        ])
+    private func hidePlaceHolder(_ value: Bool) {
+        guard self.placeHolderLabel.isHidden != value else { return }
+        self.placeHolderLabel.isHidden = value
+        self.accessibilityLabel = value ? self.text : self.placeHolder
+        self.placeHolderConstarints?.forEach { $0.isActive = !value }
+        self.placeHolderLabelYAnchor?.isActive = !value && !self.isScrollEnabled
+        self.placeHolderLabelXAnchor?.isActive = !value && !self.isScrollEnabled
+        self.placeholderLabelWidthAnchor?.isActive = !value && self.isScrollEnabled
     }
 
-    // MARK: - Subscribe
+    private func subscribeToViewModel() {
+        self.viewModel.$textColor.removeDuplicates(by: { lhs, rhs in
+            lhs.equals(rhs)
+        })
+        .subscribe(in: &self.cancellables) { [weak self] textColor in
+            guard let self else { return }
+            self.textColor = textColor.uiColor
+            self.tintColor = textColor.uiColor
+        }
 
-    /// Subscribe to the published properties on ViewModel.
-    /// This method is internal because it can be overriden by the view that inherits from this class.
-    internal func setupSubscriptions() {
-        // TODO: If Needed
+        self.viewModel.$placeholderColor.removeDuplicates(by: { lhs, rhs in
+            lhs.equals(rhs)
+        })
+        .subscribe(in: &self.cancellables) { [weak self] placeholderColor in
+            guard let self else { return }
+            self.placeHolderLabel.textColor = placeholderColor.uiColor
+        }
+
+        self.viewModel.$backgroundColor.removeDuplicates(by: { lhs, rhs in
+            lhs.equals(rhs)
+        })
+        .subscribe(in: &self.cancellables) { [weak self] backgroundColor in
+            guard let self else { return }
+            self.backgroundColor = backgroundColor.uiColor
+        }
+
+        self.viewModel.$borderColor.removeDuplicates(by: { lhs, rhs in
+            lhs.equals(rhs)
+        })
+        .subscribe(in: &self.cancellables) { [weak self] borderColor in
+            guard let self else { return }
+            self.setBorderColor(from: borderColor)
+        }
+
+        self.viewModel.$borderWidth.removeDuplicates()
+            .subscribe(in: &self.cancellables) { [weak self] borderWidth in
+            guard let self else { return }
+            self.setBorderWidth(borderWidth * self.scaleFactor)
+        }
+
+        self.viewModel.$borderRadius.removeDuplicates()
+            .subscribe(in: &self.cancellables) { [weak self] borderRadius in
+            guard let self else { return }
+            self.setCornerRadius(borderRadius * self.scaleFactor)
+        }
+
+        self.viewModel.$horizontalSpacing.removeDuplicates()
+            .subscribe(in: &self.cancellables) { [weak self] spacing in
+            guard let self else { return }
+            self.setNeedsLayout()
+        }
+
+        self.viewModel.$font
+            .subscribe(in: &self.cancellables) { [weak self] font in
+            guard let self else { return }
+            self.font = font.uiFont
+            self.placeHolderLabel.font = font.uiFont
+        }
     }
 
-    // MARK: - Trait Collection
+    public override func becomeFirstResponder() -> Bool {
+        let bool = super.becomeFirstResponder()
+        self.viewModel.isFocused = bool
+        return bool
+    }
+
+    public override func resignFirstResponder() -> Bool {
+        super.resignFirstResponder()
+        self.viewModel.isFocused = false
+        return true
+    }
 
     public override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
 
-        // TODO: If Needed
+        if self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            self.setBorderColor(from: self.viewModel.borderColor)
+        }
+
+        guard previousTraitCollection?.preferredContentSizeCategory != self.traitCollection.preferredContentSizeCategory else { return }
+
+        self._scaleFactor.update(traitCollection: self.traitCollection)
+        self._defaultSystemVerticalPadding.update(traitCollection: self.traitCollection)
+        self.setBorderWidth(self.viewModel.borderWidth * self.scaleFactor)
+    }
+}
+
+extension TextEditorUIView: UITextViewDelegate {
+
+    public func textViewDidChange(_ textView: UITextView) {
+        self.hidePlaceHolder(!textView.text.isEmpty)
+        self._delegate?.textViewDidChange?(textView)
+    }
+
+    public func textViewDidChangeSelection(_ textView: UITextView) {
+        self._delegate?.textViewDidChangeSelection?(textView)
+    }
+
+    public func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
+        return self._delegate?.textViewShouldEndEditing?(textView) ?? true
+    }
+
+    public func textViewDidBeginEditing(_ textView: UITextView) {
+        self.hidePlaceHolder(!textView.text.isEmpty)
+        self._delegate?.textViewDidBeginEditing?(textView)
+    }
+
+    public func textViewShouldEndEditing(_ textView: UITextView) -> Bool {
+        return self._delegate?.textViewShouldEndEditing?(textView) ?? true
+    }
+
+    public func textViewDidEndEditing(_ textView: UITextView) {
+        self.hidePlaceHolder(!textView.text.isEmpty)
+        self._delegate?.textViewDidEndEditing?(textView)
+    }
+
+    public func textView(_ textView: UITextView, shouldChangeTextIn: NSRange, replacementText: String) -> Bool {
+        self._delegate?.textView?(textView, shouldChangeTextIn: shouldChangeTextIn, replacementText: replacementText) ?? true
     }
 }
