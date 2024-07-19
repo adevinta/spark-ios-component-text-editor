@@ -1,15 +1,15 @@
 //
-//  ___COMPONENT_NAME___ViewModel.swift
-//  Spark___COMPONENT_NAME___
+//  TextEditorViewModel.swift
+//  SparkTextEditor
 //
-//  Created by ___USERNAME___ on ___CURRENT_DATE___.
-//  Copyright © ___CURRENT_YEAR___ Adevinta. All rights reserved.
+//  Created by robin.lemaire on 19/07/2024.
+//  Copyright © 2024 Adevinta. All rights reserved.
 //
 
 import SwiftUI
 import SparkTheming
 
-final class ___COMPONENT_NAME___ViewModel: ObservableObject {
+final class TextEditorViewModel: ObservableObject {
 
     // MARK: - Public properties
 
@@ -18,13 +18,13 @@ final class ___COMPONENT_NAME___ViewModel: ObservableObject {
     // MARK: - Private properties
 
     private let theme: Theme
-    private var intent: ___COMPONENT_NAME___Intent
+    private var intent: TextEditorIntent
 
     // MARK: - Initialization
 
     init(
         theme: Theme,
-        intent: ___COMPONENT_NAME___Intent = .primary
+        intent: TextEditorIntent = .primary
     ) {
         self.theme = theme
         self.intent = intent

@@ -1,23 +1,23 @@
 //
-//  ___COMPONENT_NAME___ConfigurationSnapshotTests.swift
-//  Spark___COMPONENT_NAME___Tests
+//  TextEditorConfigurationSnapshotTests.swift
+//  SparkTextEditorTests
 //
-//  Created by ___USERNAME___ on ___CURRENT_DATE___.
-//  Copyright © ___CURRENT_YEAR___ Adevinta. All rights reserved.
+//  Created by robin.lemaire on 19/07/2024.
+//  Copyright © 2024 Adevinta. All rights reserved.
 //
 
 import UIKit
-@testable import Spark___COMPONENT_NAME___
+@testable import SparkTextEditor
 @_spi(SI_SPI) @testable import SparkCommon
 @_spi(SI_SPI) @testable import SparkCommonSnapshotTesting
 
-struct ___COMPONENT_NAME___ConfigurationSnapshotTests {
+struct TextEditorConfigurationSnapshotTests {
 
     // MARK: - Properties
 
-    let scenario: ___COMPONENT_NAME___ScenarioSnapshotTests
+    let scenario: TextEditorScenarioSnapshotTests
 
-    let intent: ___COMPONENT_NAME___Intent
+    let intent: TextEditorIntent
     let modes: [ComponentSnapshotTestMode]
     let sizes: [UIContentSizeCategory]
 

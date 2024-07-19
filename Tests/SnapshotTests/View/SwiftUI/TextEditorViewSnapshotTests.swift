@@ -1,21 +1,22 @@
 //
-//  ___COMPONENT_NAME___UIViewSnapshotTests.swift
-//  Spark___COMPONENT_NAME___Tests
+//  TextEditorViewSnapshotTests.swift
+//  SparkTextEditorTests
 //
-//  Created by ___USERNAME___ on ___CURRENT_DATE___.
-//  Copyright © ___CURRENT_YEAR___ Adevinta. All rights reserved.
+//  Created by robin.lemaire on 19/07/2024.
+//  Copyright © 2024 Adevinta. All rights reserved.
 //
 
 import XCTest
+import SwiftUI
 @testable import SparkTheme
 @testable import SparkTheming
 @_spi(SI_SPI) @testable import SparkCommon
 @_spi(SI_SPI) @testable import SparkCommonTesting
 @_spi(SI_SPI) @testable import SparkCommonSnapshotTesting
 
-@testable import Spark___COMPONENT_NAME___
+@testable import SparkTextEditor
 
-final class ___COMPONENT_NAME___UIViewSnapshotTests: UIKitComponentSnapshotTestCase {
+final class TextEditorViewSnapshotTests: SwiftUIComponentSnapshotTestCase {
 
     // MARK: - Properties
 
@@ -24,17 +25,16 @@ final class ___COMPONENT_NAME___UIViewSnapshotTests: UIKitComponentSnapshotTestC
     // MARK: - Tests
 
     func test() {
-        let scenarios = ___COMPONENT_NAME___ScenarioSnapshotTests.allCases
+        let scenarios = TextEditorScenarioSnapshotTests.allCases
 
         for scenario in scenarios {
-            let configurations = scenario.configuration(isSwiftUIComponent: false)
+            let configurations = scenario.configuration(isSwiftUIComponent: true)
             for configuration in configurations {
-
-                let view = ___COMPONENT_NAME___UIView(
+                let view = TextEditorView(
                     theme: self.theme,
                     intent: configuration.intent
                 )
-                view.translatesAutoresizingMaskIntoConstraints = false
+                    .fixedSize()
 
                 self.assertSnapshot(
                     matching: view,

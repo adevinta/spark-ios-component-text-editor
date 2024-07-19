@@ -1,17 +1,17 @@
 //
-//  ___COMPONENT_NAME___UIView.swift
-//  Spark___COMPONENT_NAME___
+//  TextEditorUIView.swift
+//  SparkTextEditor
 //
-//  Created by ___USERNAME___ on ___CURRENT_DATE___.
-//  Copyright © ___CURRENT_YEAR___ Adevinta. All rights reserved.
+//  Created by robin.lemaire on 19/07/2024.
+//  Copyright © 2024 Adevinta. All rights reserved.
 //
 
 import UIKit
 import SparkTheming
 @_spi(SI_SPI) import SparkCommon
 
-/// The UIKit version for the ___component_name___.
-public final class ___COMPONENT_NAME___UIView: UIView {
+/// The UIKit version for the texteditor.
+public final class TextEditorUIView: UIView {
 
     // MARK: - Components
 
@@ -27,7 +27,7 @@ public final class ___COMPONENT_NAME___UIView: UIView {
 
     private var textLabel: UILabel = {
         let label = UILabel()
-        label.text = "Hello ___COMPONENT_NAME___"
+        label.text = "Hello TextEditor"
         label.numberOfLines = 1
         label.lineBreakMode = .byTruncatingTail
         label.adjustsFontForContentSizeCategory = true
@@ -40,15 +40,15 @@ public final class ___COMPONENT_NAME___UIView: UIView {
 
     // MARK: - Public Properties
 
-    /// The spark theme of the ___component_name___.
+    /// The spark theme of the texteditor.
     public var theme: Theme {
         didSet {
             // TODO: If needed
         }
     }
 
-    /// The intent of the ___component_name___.
-    public var intent: ___COMPONENT_NAME___Intent {
+    /// The intent of the texteditor.
+    public var intent: TextEditorIntent {
         didSet {
             // TODO: If needed
         }
@@ -60,13 +60,13 @@ public final class ___COMPONENT_NAME___UIView: UIView {
 
     // MARK: - Initialization
 
-    /// Initialize a new ___component_name___ view.
+    /// Initialize a new texteditor view.
     /// - Parameters:
-    ///   - theme: The spark theme of the ___component_name___.
-    ///   - intent: The intent of the ___component_name___.
+    ///   - theme: The spark theme of the texteditor.
+    ///   - intent: The intent of the texteditor.
     public convenience init(
         theme: Theme,
-        intent: ___COMPONENT_NAME___Intent
+        intent: TextEditorIntent
     ) {
         self.init(
             theme,
@@ -76,7 +76,7 @@ public final class ___COMPONENT_NAME___UIView: UIView {
 
     private init(
         _ theme: Theme,
-        intent: ___COMPONENT_NAME___Intent
+        intent: TextEditorIntent
     ) {
         self.theme = theme
         self.intent = intent
@@ -92,7 +92,7 @@ public final class ___COMPONENT_NAME___UIView: UIView {
 
     private func setupView() {
         // Properties
-        self.accessibilityIdentifier = ___COMPONENT_NAME___AccessibilityIdentifier.view
+        self.accessibilityIdentifier = TextEditorAccessibilityIdentifier.view
 
         // Add subview
         self.addSubview(self.contentStackView)
