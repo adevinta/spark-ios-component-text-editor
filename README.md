@@ -1,61 +1,98 @@
 
-# ___COMPONENT_NAME___
+# TextEditor
 
-TODO: 
+A text area lets users enter long form text which spans over multiple lines.
 
 ## Specifications
 
-The ___component_name___ specifications on Zeroheight is [here](TODO:).
+The TextEditor specifications on Zeroheight is [here](https://spark.adevinta.com/1186e1705/p/365c2e-text-area--text-view).
 
-![Figma anatomy](https://github.com/adevinta/___REPOSITORY_NAME___/blob/main/.github/assets/anatomy.png)
+![Figma anatomy](https://github.com/user-attachments/assets/a62f1e4c-82bb-496f-9429-eada2c7aed93)
 
 ## Usage
 
-___COMPONENT_NAME___ is available both in UIKit and SwiftUI.
+TextEditor is available both in UIKit and SwiftUI.
 
-### UIKit
+### TextEditorUIView
 
 ### Usage
 
-#### Subviews
-
-* `TODO`: TODO.
-
 #### Properties
 
-* `TODO`: TODO.
+Parameters:
+* `theme`: The current Spark-Theme. [You can always define your own theme.](https://github.com/adevinta/spark-ios/wiki/Theming#your-own-theming)
+* `intent`: The intent of the TextEditor, e.g. neutral, success
+
+**Note**: You can use TextEditor with Formfield to support title and helper message. (Status icon and chracter count label haven't added to Formfield yet.)
 
 #### Published Properties
 
-* `TODO`: TODO.
+* `theme`: The current Spark-Theme. [You can always define your own theme.](https://github.com/adevinta/spark-ios/wiki/Theming#your-own-theming)
+* `intent`: The intent of the TextEditor, e.g. neutral, success
+* `text`: The text of the TextEditor, it is native textview's text property.
+* `placeHolder`: The placeHolder of the TextEditor, it is native textview's placeHolder property.
+* `isEnabled`: Default value is 'true', disables user interaction. If It is set with 'isReadOnly' property, priorty will support `isEnabled` property. 
+* `isReadOnly`: Default value is 'false', disables edit mode of component. User can scroll and copy text.
+* `isScrollEnabled`: Default value is 'true', disables scrollable feature of component. Set this property as an 'false' to provide dynamic height and don't give static height.
 
-#### Initialization
-
-```swift
-let ___component_name___ = ___COMPONENT_NAME___UIView(
-    TODO: TODO
-)
-```
-
-#### Getter / Setter
-
-TODO
-
-
-### SwiftUI
-
-#### Initialization
+#### Example
 
 ```swift
-let ___component_name___ = ___COMPONENT_NAME___View(
-    TODO: TODO
+let texteditor = TextEditorUIView(
+    theme: Theme,
+    intent: TextEditorIntent
 )
+view.addSubview(texteditor)
+
+self.texteditor.widthAnchor.constraint(equalToConstant: 300).isActive = true
+self.texteditor.heightAnchor.constraint(equalToConstant: 100).isActive = true
+
+/// To support dynamic height, minimum height is 40px If it isn't set. You can change minimum height. 
+self.texteditor.isScrollEnabled = false
+self.texteditor.widthAnchor.constraint(equalToConstant: 300).isActive = true
+self.texteditor.heightAnchor.constraint(greaterThanOrEqualTo: 70).isActive = true
 ```
+
+### TextEditorView
+
+### Usage
+
+#### Properties
+
+Parameters:
+* `theme`: The current Spark-Theme. [You can always define your own theme.](https://github.com/adevinta/spark-ios/wiki/Theming#your-own-theming)
+* `intent`: The intent of the TextEditor, e.g. neutral, success
+* `text`: The text of the TextEditor.
+* `titleKey`: The placeHolder of the TextEditor.
+
+**Note**: You can use TextEditor with Formfield to support title and helper message. (Status icon and chracter count label haven't added to Formfield yet.)
 
 #### Modifier
 
-TODO
+* `.isReadOnly(Bool)`: Default value is 'false', disables edit mode of component. User can scroll and copy text.
 
+#### Example
+
+```swift
+@State private var theme: Theme = Theme
+@State private var intent: TextEditorIntent = .neutral
+@State private var text: String = ""
+@FocusState private var isFocused: Bool
+
+ var body: some View {
+        TextEditorView(
+            "Placeholder",
+            text: self.$text,
+            theme: self.theme,
+            intent: self.intent
+        )
+        .isReadOnly(false) /// set this modifier as a 'true' to enable readonly mode.
+        .focused(self.$isFocused)
+        .disabled(false) /// if It is set as a 'true'. Read-only mode will be disabled
+        .frame(width: 300, height: 100) /// set this modifier to provide static height. It will be scrollable automaticly.
+
+    /// Component has dynamic height as a default. Minimum height is 40px.
+}
 
 ## License
 

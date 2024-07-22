@@ -1,0 +1,31 @@
+//
+//  TextEditorBordersUseCase.swift
+//  SparkEditor
+//
+//  Created by alican.aycil on 27.05.24.
+//  Copyright © 2024 Adevinta. All rights reserved.
+//
+
+import Foundation
+import SparkTheming
+
+// sourcery: AutoMockable
+protocol TextEditorBordersUseCasable {
+    func execute(theme: Theme, intent: TextEditorIntent, isFocused: Bool) -> TextEditorBorders
+}
+
+final class TextEditorBordersUseCase: TextEditorBordersUseCasable {
+    func execute(
+        theme: Theme,
+        intent: TextEditorIntent,
+        isFocused: Bool) -> TextEditorBorders {
+
+        let radious = theme.border.radius.large
+        let width = isFocused ? theme.border.width.medium : theme.border.width.small
+
+        return .init(
+            radius: radious,
+            width: width
+        )
+    }
+}
