@@ -1,7 +1,7 @@
 
 # TextEditor
 
-TODO: 
+A text area lets users enter long form text which spans over multiple lines.
 
 ## Specifications
 
@@ -13,34 +13,45 @@ The TextEditor specifications on Zeroheight is [here](https://spark.adevinta.com
 
 TextEditor is available both in UIKit and SwiftUI.
 
-### UIKit
+### TextEditorUIView
 
 ### Usage
 
-#### Subviews
-
-* `TODO`: TODO.
-
 #### Properties
 
-* `TODO`: TODO.
+Parameters:
+* `theme`: The current Spark-Theme. [You can always define your own theme.](https://github.com/adevinta/spark-ios/wiki/Theming#your-own-theming)
+* `intent`: The intent of the TextEditor, e.g. neutral, success
+
+**Note**: You can use TextEditor with Formfield to support title and helper message. (Status icon and chracter count label haven't added to Formfield yet.)
 
 #### Published Properties
 
-* `TODO`: TODO.
+* `theme`: The current Spark-Theme. [You can always define your own theme.](https://github.com/adevinta/spark-ios/wiki/Theming#your-own-theming)
+* `intent`: The intent of the TextEditor, e.g. neutral, success
+* `text`: The text of the TextEditor, it is native textview's text property.
+* `placeHolder`: The placeHolder of the TextEditor, it is native textview's placeHolder property.
+* `isEnabled`: Default value is 'true', disables user interaction. If It is set with 'isReadOnly' property, priorty will support `isEnabled` property. 
+* `isReadOnly`: Default value is 'false', disables edit mode of component. User can scroll and copy text.
+* `isScrollEnabled`: Default value is 'true', disables scrollable feature of component. Set this property as an 'false' to provide dynamic height and don't give static height.
 
-#### Initialization
+#### Example
 
 ```swift
 let texteditor = TextEditorUIView(
-    TODO: TODO
+    theme: Theme,
+    intent: TextEditorIntent
 )
+view.addSubview(texteditor)
+
+self.texteditor.widthAnchor.constraint(equalToConstant: 300).isActive = true
+self.texteditor.heightAnchor.constraint(equalToConstant: 100).isActive = true
+
+/// To support dynamic height, minimum height is 40px If it isn't set. You can change minimum height. 
+self.texteditor.isScrollEnabled = false
+self.texteditor.widthAnchor.constraint(equalToConstant: 300).isActive = true
+self.texteditor.heightAnchor.constraint(greaterThanOrEqualTo: 70).isActive = true
 ```
-
-#### Getter / Setter
-
-TODO
-
 
 ### SwiftUI
 
