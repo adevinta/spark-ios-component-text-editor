@@ -5,9 +5,9 @@ TODO:
 
 ## Specifications
 
-The texteditor specifications on Zeroheight is [here](TODO:).
+The TextEditor specifications on Zeroheight is [here](TODO:).
 
-![Figma anatomy](https://github.com/adevinta/spark-ios-component-text-editor/blob/main/.github/assets/anatomy.png)
+![Figma anatomy](https://github.com/user-attachments/assets/a62f1e4c-82bb-496f-9429-eada2c7aed93)
 
 ## Usage
 
