@@ -76,7 +76,7 @@ Parameters:
 ```swift
 @State private var theme: Theme = Theme
 @State private var intent: TextEditorIntent = .neutral
-@State var text: String = ""
+@State private var text: String = ""
 @FocusState private var isFocused: Bool
 
  var body: some View {
