@@ -5,7 +5,7 @@ TODO:
 
 ## Specifications
 
-The TextEditor specifications on Zeroheight is [here](TODO:).
+The TextEditor specifications on Zeroheight is [here](https://spark.adevinta.com/1186e1705/p/365c2e-text-area--text-view).
 
 ![Figma anatomy](https://github.com/user-attachments/assets/a62f1e4c-82bb-496f-9429-eada2c7aed93)
 
