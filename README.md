@@ -53,20 +53,46 @@ self.texteditor.widthAnchor.constraint(equalToConstant: 300).isActive = true
 self.texteditor.heightAnchor.constraint(greaterThanOrEqualTo: 70).isActive = true
 ```
 
-### SwiftUI
+### TextEditorView
 
-#### Initialization
+### Usage
 
-```swift
-let texteditor = TextEditorView(
-    TODO: TODO
-)
-```
+#### Properties
+
+Parameters:
+* `theme`: The current Spark-Theme. [You can always define your own theme.](https://github.com/adevinta/spark-ios/wiki/Theming#your-own-theming)
+* `intent`: The intent of the TextEditor, e.g. neutral, success
+* `text`: The text of the TextEditor.
+* `titleKey`: The placeHolder of the TextEditor.
+
+**Note**: You can use TextEditor with Formfield to support title and helper message. (Status icon and chracter count label haven't added to Formfield yet.)
 
 #### Modifier
 
-TODO
+* `.isReadOnly(Bool)`: Default value is 'false', disables edit mode of component. User can scroll and copy text.
 
+#### Example
+
+```swift
+@State private var theme: Theme = Theme
+@State private var intent: TextEditorIntent = .neutral
+@State var text: String = ""
+@FocusState private var isFocused: Bool
+
+ var body: some View {
+        TextEditorView(
+            "Placeholder",
+            text: self.$text,
+            theme: self.theme,
+            intent: self.intent
+        )
+        .isReadOnly(false) /// set this modifier as a 'true' to enable readonly mode.
+        .focused(self.$isFocused)
+        .disabled(false) /// if It is set as a 'true'. Read-only mode will be disabled
+        .frame(width: 300, height: 100) /// set this modifier to provide static height. It will be scrollable automaticly.
+
+    /// Component has dynamic height as a default. Minimum height is 40px.
+}
 
 ## License
 
